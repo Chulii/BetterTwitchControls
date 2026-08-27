@@ -107,7 +107,13 @@ function openUrl(url) {
 function setupFooterLinks() {
   const updateLink = document.getElementById("updateLink");
   if (updateLink) {
-    const url = `chrome://extensions/?id=${chrome.runtime.id}`;
+    const isFirefox = navigator.userAgent.includes("Firefox");
+    const url = isFirefox
+      ? "about:addons"
+      : `chrome://extensions/?id=${chrome.runtime.id}`;
+    updateLink.textContent = isFirefox
+      ? "Manage updates in Add-ons"
+      : "Manage updates in Extensions";
     updateLink.addEventListener("click", (e) => {
       e.preventDefault();
       openUrl(url);
@@ -117,35 +123,15 @@ function setupFooterLinks() {
   const contributeLink = document.getElementById("contributeLink");
   if (contributeLink) {
     contributeLink.addEventListener("click", (e) => {
-      // ensure new tab from the popup (more reliable than target=_blank)
       e.preventDefault();
-      openUrl("https://github.com/socialites/BetterTwitchControls");
+      openUrl("https://github.com/Chulii/BetterTwitchControls");
     });
   }
 }
 
-function checkForUpdate() {
-  const updateLink = document.getElementById("updateLink");
-  if (!updateLink) return;
-
-  // If the extension is store-installed, Chrome can tell us if an update is available.
-  // In dev/unpacked, this may just report "no_update" or be throttled; we keep the link.
-  try {
-    chrome.runtime.requestUpdateCheck((status /*, details */) => {
-      if (status === "update_available") {
-        updateLink.textContent = "Update available — Click here to update";
-      } else {
-        updateLink.textContent = "You are up to date";
-      }
-    });
-  } catch {
-    updateLink.textContent = "Click here to check for updates";
-  }
-}
 
 document.addEventListener("DOMContentLoaded", () => {
   setupFooterLinks();
   setVersion();
-  checkForUpdate();
   loadControls();
 });

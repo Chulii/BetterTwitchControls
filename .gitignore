@@ -4,3 +4,4 @@ extension/
 .vscode/
 extension.zip
 BetterTwitchControls.zip
+*.xpi

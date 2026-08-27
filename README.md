@@ -5,9 +5,15 @@
 ### Controls
 
 <!-- CONTROLS:START -->
+
+
 ### BetterTwitchControls — Controls
 
 ### Implemented
+
+- **`1`–`9`**: Open the corresponding visible stream in the Twitch sidebar.
+- **`Shift` + `1`–`9`**: Open the corresponding visible sidebar stream in a new tab.
+- **`?`**: Show or hide the in-page shortcut guide.
 
 - **`c`**: Focus the chat input (only when you are *not* already typing in an input/textarea/contenteditable).
 - **`Esc` (while chat is focused)**: Leave chat focus and focus the player controls (so player hotkeys work again).
@@ -30,6 +36,7 @@
 - **Misc**
   - **Clip**: `⌥+x` (Twitch built-in)
   - **Mute/Unmute**: `m` (Twitch built-in)
+
 <!-- CONTROLS:END -->
 
 ### Build
@@ -41,6 +48,18 @@ pnpm run build
 ```
 
 This produces `dist/index.js`.
+
+### Install in Zen Browser (persistent)
+
+Build the extension package:
+
+```bash
+pnpm run build:extension
+```
+
+In Zen, open `about:addons`, select the gear menu, choose **Install Add-on From File…**, and select `BetterTwitchControls-Zen-1.2.0.xpi`.
+
+The package has a stable Firefox extension ID, making it eligible for a persistent add-on installation instead of an `about:debugging` temporary load. Firefox-family release builds require an AMO-signed XPI; Zen installations that enforce extension signing must use the AMO-signed package.
 
 ### Install in Chrome / Arc / Brave (Extension)
 

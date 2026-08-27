@@ -332,6 +332,85 @@ function adjustVolume(delta: number) {
   setRangeValue(slider, current + delta * step);
 }
 
+const SHORTCUT_OVERLAY_ID = "better-twitch-controls-shortcuts";
+const SHORTCUTS = [
+  ["1–9", "Open the corresponding sidebar stream"],
+  ["Shift + 1–9", "Open the corresponding sidebar stream in a new tab"],
+  ["?", "Show or hide this shortcut guide"],
+  ["c", "Focus chat"],
+  ["Esc", "Leave chat and focus player controls"],
+  ["t", "Toggle Theatre Mode"],
+  ["l", "Skip to Live"],
+  ["↑ / ↓", "Adjust volume"],
+];
+
+function getSidebarStream(index: number): HTMLAnchorElement | null {
+  const streams = document.querySelectorAll<HTMLAnchorElement>(
+    'a.side-nav-card__link[href]',
+  );
+  return streams[index] || null;
+}
+
+function openSidebarStream(index: number, inNewTab: boolean) {
+  const stream = getSidebarStream(index);
+  if (!stream) return;
+
+  if (inNewTab) {
+    window.open(stream.href, "_blank", "noopener");
+    return;
+  }
+
+  stream.click();
+}
+
+function getShortcutOverlay(): HTMLElement | null {
+  const overlay = document.getElementById(SHORTCUT_OVERLAY_ID);
+  return overlay instanceof HTMLElement ? overlay : null;
+}
+
+function toggleShortcutOverlay() {
+  const existing = getShortcutOverlay();
+  if (existing) {
+    existing.remove();
+    return;
+  }
+
+  const overlay = document.createElement("section");
+  overlay.id = SHORTCUT_OVERLAY_ID;
+  overlay.setAttribute("role", "dialog");
+  overlay.setAttribute("aria-label", "Better Twitch Controls shortcuts");
+  overlay.innerHTML = `
+    <style>
+      #${SHORTCUT_OVERLAY_ID} {
+        position: fixed; z-index: 2147483647; top: 5rem; right: 1.5rem;
+        width: min(32rem, calc(100vw - 3rem)); padding: 1.25rem;
+        border: 1px solid #9147ff; border-radius: .5rem;
+        background: #18181b; box-shadow: 0 .5rem 2rem rgb(0 0 0 / .55);
+        color: #efeff1; font: 14px/1.4 Inter, Helvetica, Arial, sans-serif;
+      }
+      #${SHORTCUT_OVERLAY_ID} h2 { margin: 0 0 1rem; font-size: 1.125rem; }
+      #${SHORTCUT_OVERLAY_ID} dl {
+        display: grid; grid-template-columns: max-content 1fr; gap: .625rem 1rem;
+        margin: 0;
+      }
+      #${SHORTCUT_OVERLAY_ID} dt {
+        padding: .125rem .375rem; border-radius: .25rem;
+        background: #303035; color: #fff; font-weight: 700;
+      }
+      #${SHORTCUT_OVERLAY_ID} dd { margin: 0; }
+    </style>
+    <h2>Better Twitch Controls</h2>
+    <dl>${SHORTCUTS.map(([key, description]) => `<dt>${key}</dt><dd>${description}</dd>`).join("")}</dl>
+  `;
+  document.body.append(overlay);
+}
+
+function getStreamShortcutIndex(e: KeyboardEvent): number | null {
+  if (e.altKey || e.ctrlKey || e.metaKey) return null;
+  if (!/^Digit[1-9]$/.test(e.code)) return null;
+  return Number(e.code.substring("Digit".length)) - 1;
+}
+
 function onKeyDown(e: KeyboardEvent) {
   if (e.defaultPrevented) return;
   if (e.isComposing) return;
@@ -386,6 +465,23 @@ function onKeyDown(e: KeyboardEvent) {
 
   // If you're already typing anywhere (including chat), don't steal keys.
   if (isEditableElement(active)) return;
+
+  // "?" toggles an in-page shortcut reference.
+  if (e.key === "?" && !e.altKey && !e.ctrlKey && !e.metaKey) {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleShortcutOverlay();
+    return;
+  }
+
+  // 1–9 select the visible streams in Twitch's sidebar. Shift opens the stream in a new tab.
+  const streamIndex = getStreamShortcutIndex(e);
+  if (streamIndex !== null) {
+    e.preventDefault();
+    e.stopPropagation();
+    openSidebarStream(streamIndex, e.shiftKey);
+    return;
+  }
 
   // "t": toggle theatre mode when the player controls are focused.
   if (e.key === "t" || e.key === "T") {

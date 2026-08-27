@@ -3,6 +3,10 @@
 
 ### Implemented
 
+- **`1`–`9`**: Open the corresponding visible stream in the Twitch sidebar.
+- **`Shift` + `1`–`9`**: Open the corresponding visible sidebar stream in a new tab.
+- **`?`**: Show or hide the in-page shortcut guide.
+
 - **`c`**: Focus the chat input (only when you are *not* already typing in an input/textarea/contenteditable).
 - **`Esc` (while chat is focused)**: Leave chat focus and focus the player controls (so player hotkeys work again).
 - **`t` (while player controls are focused)**: Toggle Theatre Mode (clicks the Twitch theatre-mode button that’s labeled with `(alt+t)`).

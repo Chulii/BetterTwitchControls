@@ -1,22 +1,22 @@
 {
   "name": "BetterTwitchControls",
-  "version": "1.1.3",
+  "version": "1.2.0",
   "description": "Keyboard shortcuts for Twitch chat/player focus and controls. Created by itspinot on Twitch",
   "main": "dist/index.js",
-  "homepage": "https://github.com/socialites/BetterTwitchControls",
+  "homepage": "https://github.com/Chulii/BetterTwitchControls",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/socialites/BetterTwitchControls.git"
+    "url": "git+https://github.com/Chulii/BetterTwitchControls.git"
   },
   "bugs": {
-    "url": "https://github.com/socialites/BetterTwitchControls/issues"
+    "url": "https://github.com/Chulii/BetterTwitchControls/issues"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "sync:docs": "node scripts/sync-docs.mjs",
     "prepare:extension": "node scripts/prepare-extension.mjs",
-    "zip:extension": "rm -f BetterTwitchControls.zip && cd extension && zip -r -q ../BetterTwitchControls.zip . -x '**/.DS_Store'",
-    "build:extension": "pnpm run build && pnpm run prepare:extension && pnpm run zip:extension",
+    "package:plugin": "rm -f BetterTwitchControls-Zen-1.2.0.xpi && cd extension && zip -r -q ../BetterTwitchControls-Zen-1.2.0.xpi . -x '**/.DS_Store'",
+    "build:extension": "pnpm run build && pnpm run prepare:extension && pnpm run package:plugin",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": ["twitch", "controls", "keyboard", "shortcuts", "itspinot", "socialites"],

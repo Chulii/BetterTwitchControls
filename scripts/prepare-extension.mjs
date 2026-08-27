@@ -18,7 +18,12 @@ const manifest = {
   name: "BetterTwitchControls",
   version: String(pkg.version || "1.0.0"),
   description: "Keyboard shortcuts for Twitch chat/player focus and controls.",
-  homepage_url: "https://github.com/socialites/BetterTwitchControls",
+  homepage_url: "https://github.com/Chulii/BetterTwitchControls",
+  browser_specific_settings: {
+    gecko: {
+      id: "better-twitch-controls@socialites.github.io",
+    },
+  },
   icons: {
     16: "assets/icons/icon16.png",
     48: "assets/icons/icon48.png",

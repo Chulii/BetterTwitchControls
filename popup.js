@@ -1,73 +1,78 @@
-function escapeHtml(s) {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
+function appendInlineFormat(parent, text) {
+  const tokenPattern = /(`([^`]+)`|\*\*([^*]+)\*\*)/g;
+  let lastIndex = 0;
 
-function inlineFormat(s) {
-  // order matters: escape first, then format
-  let out = escapeHtml(s);
-  out = out.replace(/`([^`]+)`/g, "<code>$1</code>");
-  out = out.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
-  return out;
+  for (const match of text.matchAll(tokenPattern)) {
+    parent.append(document.createTextNode(text.slice(lastIndex, match.index)));
+
+    if (match[2] !== undefined) {
+      const code = document.createElement("code");
+      code.textContent = match[2];
+      parent.append(code);
+    } else {
+      const strong = document.createElement("strong");
+      strong.textContent = match[3];
+      parent.append(strong);
+    }
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  parent.append(document.createTextNode(text.slice(lastIndex)));
 }
 
 function renderMarkdown(md) {
   const lines = md.replace(/\r\n/g, "\n").split("\n");
-  const html = [];
-
-  let listStack = []; // array of indent levels
+  const fragment = document.createDocumentFragment();
+  const listStack = [];
 
   const closeListsDownTo = (targetDepth) => {
-    while (listStack.length > targetDepth) {
-      html.push("</ul>");
-      listStack.pop();
-    }
+    listStack.length = targetDepth;
   };
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-
-    // Headings (we only use ### in this repo)
+  for (const line of lines) {
     if (/^###\s+/.test(line)) {
       closeListsDownTo(0);
-      const text = line.replace(/^###\s+/, "");
-      html.push(`<h2>${inlineFormat(text)}</h2>`);
+      const heading = document.createElement("h2");
+      appendInlineFormat(heading, line.replace(/^###\s+/, ""));
+      fragment.append(heading);
       continue;
     }
 
-    // Blank line
     if (!line.trim()) {
       closeListsDownTo(0);
       continue;
     }
 
-    // List items: support nested lists via leading spaces
-    const m = line.match(/^(\s*)-\s+(.*)$/);
-    if (m) {
-      const indentSpaces = m[1].length;
-      const depth = Math.floor(indentSpaces / 2); // 2 spaces per depth in our markdown
+    const match = line.match(/^(\s*)-\s+(.*)$/);
+    if (match) {
+      const depth = Math.floor(match[1].length / 2);
 
-      while (listStack.length < depth + 1) {
-        html.push("<ul>");
-        listStack.push(depth);
-      }
       closeListsDownTo(depth + 1);
+      while (listStack.length < depth + 1) {
+        const list = document.createElement("ul");
+        const parentList = listStack.at(-1);
+        if (parentList) {
+          parentList.lastElementChild?.append(list);
+        } else {
+          fragment.append(list);
+        }
+        listStack.push(list);
+      }
 
-      html.push(`<li>${inlineFormat(m[2])}</li>`);
+      const item = document.createElement("li");
+      appendInlineFormat(item, match[2]);
+      listStack.at(-1).append(item);
       continue;
     }
 
-    // Paragraph fallback
     closeListsDownTo(0);
-    html.push(`<div>${inlineFormat(line.trim())}</div>`);
+    const paragraph = document.createElement("div");
+    appendInlineFormat(paragraph, line.trim());
+    fragment.append(paragraph);
   }
 
-  closeListsDownTo(0);
-  return html.join("\n");
+  return fragment;
 }
 
 async function loadControls() {
@@ -76,12 +81,12 @@ async function loadControls() {
     const url = chrome.runtime.getURL("CONTROLS.md");
     const res = await fetch(url);
     if (!res.ok) throw new Error(`Failed to load controls: ${res.status}`);
-    const md = await res.text();
-    contentEl.innerHTML = renderMarkdown(md);
+    contentEl.replaceChildren(renderMarkdown(await res.text()));
   } catch (err) {
-    contentEl.innerHTML = `<div class="error">${escapeHtml(
-      String(err && err.message ? err.message : err),
-    )}</div>`;
+    const error = document.createElement("div");
+    error.className = "error";
+    error.textContent = String(err && err.message ? err.message : err);
+    contentEl.replaceChildren(error);
   }
 }
 

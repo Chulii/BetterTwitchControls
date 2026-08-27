@@ -379,29 +379,40 @@ function toggleShortcutOverlay() {
   overlay.id = SHORTCUT_OVERLAY_ID;
   overlay.setAttribute("role", "dialog");
   overlay.setAttribute("aria-label", "Better Twitch Controls shortcuts");
-  overlay.innerHTML = `
-    <style>
-      #${SHORTCUT_OVERLAY_ID} {
-        position: fixed; z-index: 2147483647; top: 5rem; right: 1.5rem;
-        width: min(32rem, calc(100vw - 3rem)); padding: 1.25rem;
-        border: 1px solid #9147ff; border-radius: .5rem;
-        background: #18181b; box-shadow: 0 .5rem 2rem rgb(0 0 0 / .55);
-        color: #efeff1; font: 14px/1.4 Inter, Helvetica, Arial, sans-serif;
-      }
-      #${SHORTCUT_OVERLAY_ID} h2 { margin: 0 0 1rem; font-size: 1.125rem; }
-      #${SHORTCUT_OVERLAY_ID} dl {
-        display: grid; grid-template-columns: max-content 1fr; gap: .625rem 1rem;
-        margin: 0;
-      }
-      #${SHORTCUT_OVERLAY_ID} dt {
-        padding: .125rem .375rem; border-radius: .25rem;
-        background: #303035; color: #fff; font-weight: 700;
-      }
-      #${SHORTCUT_OVERLAY_ID} dd { margin: 0; }
-    </style>
-    <h2>Better Twitch Controls</h2>
-    <dl>${SHORTCUTS.map(([key, description]) => `<dt>${key}</dt><dd>${description}</dd>`).join("")}</dl>
+
+  const style = document.createElement("style");
+  style.textContent = `
+    #better-twitch-controls-shortcuts {
+      position: fixed; z-index: 2147483647; top: 5rem; right: 1.5rem;
+      width: min(32rem, calc(100vw - 3rem)); padding: 1.25rem;
+      border: 1px solid #9147ff; border-radius: .5rem;
+      background: #18181b; box-shadow: 0 .5rem 2rem rgb(0 0 0 / .55);
+      color: #efeff1; font: 14px/1.4 Inter, Helvetica, Arial, sans-serif;
+    }
+    #better-twitch-controls-shortcuts h2 { margin: 0 0 1rem; font-size: 1.125rem; }
+    #better-twitch-controls-shortcuts dl {
+      display: grid; grid-template-columns: max-content 1fr; gap: .625rem 1rem;
+      margin: 0;
+    }
+    #better-twitch-controls-shortcuts dt {
+      padding: .125rem .375rem; border-radius: .25rem;
+      background: #303035; color: #fff; font-weight: 700;
+    }
+    #better-twitch-controls-shortcuts dd { margin: 0; }
   `;
+
+  const heading = document.createElement("h2");
+  heading.textContent = "Better Twitch Controls";
+  const shortcuts = document.createElement("dl");
+  for (const [key, description] of SHORTCUTS) {
+    const term = document.createElement("dt");
+    term.textContent = key;
+    const definition = document.createElement("dd");
+    definition.textContent = description;
+    shortcuts.append(term, definition);
+  }
+
+  overlay.append(style, heading, shortcuts);
   document.body.append(overlay);
 }
 

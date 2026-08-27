@@ -22,6 +22,9 @@ const manifest = {
   browser_specific_settings: {
     gecko: {
       id: "better-twitch-controls@socialites.github.io",
+      data_collection_permissions: {
+        required: ["none"],
+      },
     },
   },
   icons: {
